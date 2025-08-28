@@ -71,3 +71,16 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
+
+enable_testing()
+find_package(GTest REQUIRED)
+
+add_executable(test_hungarian
+  test/test_hungarian.cpp)
+
+target_link_libraries(test_hungarian
+  ${PROJECT_NAME}
+  GTest::gtest_main
+)
+
+gtest_discover_tests(test_hungarian)
