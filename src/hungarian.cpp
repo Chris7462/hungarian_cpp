@@ -8,25 +8,25 @@
 //********************************************************//
 // Main solve function - clean entry point
 //********************************************************//
-double Hungarian::solve(const Matrix & distMatrix, Vector & assignment)
+double Hungarian::solve(const Matrix & costMatrix, Vector & assignment)
 {
   // Validate input matrix dimensions
-  if (distMatrix.rows() <= 0 || distMatrix.cols() <= 0) {
+  if (costMatrix.rows() <= 0 || costMatrix.cols() <= 0) {
     throw std::invalid_argument("Matrix dimensions must be positive.");
   }
 
   // Check for negative values
-  if ((distMatrix.array() < 0).any()) {
+  if ((costMatrix.array() < 0).any()) {
     throw std::invalid_argument("All matrix elements must be non-negative.");
   }
 
   // Check for infinite or NaN values
-  if (!distMatrix.allFinite()) {
+  if (!costMatrix.allFinite()) {
     throw std::invalid_argument("Matrix contains infinite or NaN values.");
   }
 
   // Initialize algorithm state
-  initializeAlgorithm(distMatrix);
+  initializeAlgorithm(costMatrix);
 
   // Execute main algorithm loop
   executeMainLoop();
@@ -35,18 +35,18 @@ double Hungarian::solve(const Matrix & distMatrix, Vector & assignment)
   assignment = Vector::Constant(nRows_, -1);
   buildAssignmentVector(assignment);
 
-  return computeTotalCost(distMatrix, assignment);
+  return computeTotalCost(costMatrix, assignment);
 }
 
 //********************************************************//
 // Initialize all algorithm state and data structures
 //********************************************************//
-void Hungarian::initializeAlgorithm(const Matrix & distMatrix)
+void Hungarian::initializeAlgorithm(const Matrix & costMatrix)
 {
   // Cache dimensions and working matrix
-  nRows_ = distMatrix.rows();
-  nCols_ = distMatrix.cols();
-  workingMatrix_ = distMatrix;
+  nRows_ = costMatrix.rows();
+  nCols_ = costMatrix.cols();
+  workingMatrix_ = costMatrix;
 
   // Initialize state matrices
   starMatrix_ = BoolMatrix::Zero(nRows_, nCols_);
@@ -64,8 +64,15 @@ void Hungarian::executeMainLoop()
   step2_StarZeros();
   step3_CoverStarredColumns();
 
+  // Add safety counter to prevent infinite loops
+  int maxIterations = nRows_ * nCols_ * 10; // Conservative upper bound
+  int iterations = 0;
+
   // Main loop - continue until optimal solution found
   while (!isOptimalSolutionFound()) {
+    if (++iterations > maxIterations) {
+      throw std::runtime_error("Algorithm failed to converge - possible implementation error");
+    }
     step4_FindUncoveredZero();
   }
 }
@@ -138,13 +145,7 @@ void Hungarian::step2_StarZeros()
 //********************************************************//
 void Hungarian::step3_CoverStarredColumns()
 {
-  coveredColumns_.setZero();
-
-  for (int col = 0; col < nCols_; ++col) {
-    if (starMatrix_.col(col).any()) {
-      coveredColumns_(col) = true;
-    }
-  }
+  coveredColumns_ = starMatrix_.colwise().any().transpose();
 }
 
 //********************************************************//
@@ -360,15 +361,22 @@ std::pair<int, int> Hungarian::findUncoveredZero() const
 double Hungarian::findMinimumUncoveredValue() const
 {
   double minValue = std::numeric_limits<double>::max();
+  bool foundUncoveredElement = false;
 
   for (int row = 0; row < nRows_; ++row) {
     if (!coveredRows_(row)) {
       for (int col = 0; col < nCols_; ++col) {
         if (!coveredColumns_(col)) {
           minValue = std::min(minValue, workingMatrix_(row, col));
+          foundUncoveredElement = true;
         }
       }
     }
+  }
+
+  // Add this check
+  if (!foundUncoveredElement) {
+    throw std::runtime_error("Algorithm error: No uncovered elements found when updating matrix");
   }
 
   return minValue;

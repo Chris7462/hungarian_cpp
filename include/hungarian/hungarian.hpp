@@ -6,9 +6,8 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
 #include <Eigen/Dense>
+
 
 class Hungarian
 {
@@ -24,20 +23,20 @@ public:
 
   /**
    * @brief Solve assignment problem using Hungarian/Munkres algorithm
-   * @param distMatrix Cost matrix (rows=workers, cols=tasks)
+   * @param costMatrix Cost matrix (rows=workers, cols=tasks)
    * @param assignment Output vector where assignment[i] = j means worker i assigned to task j
    * @return Total cost of optimal assignment
    * @throws std::invalid_argument for invalid input matrices
    */
-  double solve(const Matrix & distMatrix, Vector & assignment);
+  double solve(const Matrix & costMatrix, Vector & assignment);
 
 private:
   // Algorithm state and flow control
-  void initializeAlgorithm(const Matrix & distMatrix);
+  void initializeAlgorithm(const Matrix & costMatrix);
   void executeMainLoop();
   bool isOptimalSolutionFound() const;
 
-  // Classic Munkres algorithm steps (clear 1-to-1 mapping)
+  // Classic Hungarian algorithm steps
   void step1_ReduceMatrix();
   void step2_StarZeros();
   void step3_CoverStarredColumns();
