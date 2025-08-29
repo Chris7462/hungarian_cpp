@@ -298,7 +298,6 @@ double Hungarian::computeTotalCost(const Matrix & originalMatrix, const Vector &
 //********************************************************//
 // Utility methods for searching matrix elements
 //********************************************************//
-
 int Hungarian::findStarInRow(const int row) const
 {
   // Validate row index
