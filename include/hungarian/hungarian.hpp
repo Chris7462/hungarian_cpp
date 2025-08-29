@@ -1,20 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
-// HungarianEigen.h: Modern Hungarian Algorithm implementation using Eigen
+// hungarian.hpp: Modern Hungarian Algorithm implementation using Eigen
 // Based on Munkres algorithm for solving assignment problems
 // Modernized version with Eigen library for better performance and readability
 ///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
+#include <iostream>
 #include <vector>
-#include <limits>
-
 #include <Eigen/Dense>
-
 
 class Hungarian
 {
 public:
+  // Helper type definitions for better readability
   using Matrix = Eigen::MatrixXd;
   using Vector = Eigen::VectorXi;
   using BoolMatrix = Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>;
@@ -23,29 +22,29 @@ public:
   Hungarian() = default;
   ~Hungarian() = default;
 
-  double solve(const Matrix& costMatrix, Vector& assignment);
+  double solve(const Matrix & distMatrix, Vector & assignment);
 
 private:
-  // Core algorithm steps
-  void initializeMatrix(Matrix& distMatrix);
-  void findInitialAssignment();
-  bool findOptimalAssignment();
-  void augmentPath(int row, int col);
-  void updateMatrix();
-  double computeCost(const Matrix& originalMatrix, const Vector& assignment);
+  // Core algorithm phases (preserving original step structure)
+  void executeOptimalAssignment();
+  void buildAssignmentVector(Vector & assignment);
+  double computeAssignmentCost(const Matrix & originalMatrix, const Vector & assignment);
 
-  // Helper functions
-  bool findUncoveredZero(int& row, int& col);
-  bool findStarInRow(int row, int& col);
-  bool findStarInColumn(int col, int& row);
-  bool findPrimeInRow(int row, int& col);
-  double findMinUncoveredValue();
+  // Algorithm steps with descriptive names
+  void coverColumnsWithStars();
+  void checkOptimalityAndProceed();
+  void findAndProcessUncoveredZeros();
+  void augmentAlternatingPath(int row, int col);
+  void updateMatrixValues();
 
-  // Algorithm state
-  Matrix distMatrix_;
-  BoolMatrix starMatrix_;
-  BoolMatrix primeMatrix_;
-  BoolVector coveredRows_;
-  BoolVector coveredColumns_;
-  int nRows_, nCols_, minDim_;
+  int findStarInRow(int row) const;
+  int findStarInColumn(int col) const;
+  int findPrimeInRow(int row) const;
+
+  // Member variables - core algorithm state only
+  Matrix distMatrix_;             // Working distance matrix
+  BoolMatrix starMatrix_;         // Starred zeros matrix
+  BoolMatrix primeMatrix_;        // Primed zeros matrix
+  BoolVector coveredRows_;        // Row coverage flags
+  BoolVector coveredColumns_;     // Column coverage flags
 };
