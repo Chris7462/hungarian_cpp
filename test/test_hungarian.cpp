@@ -10,12 +10,16 @@ protected:
   Hungarian solver;
 
   // Helper function to print assignment for debugging
-  void printAssignment(const Hungarian::VectorXi & assignment, double cost) {
+  void printAssignment(const Hungarian::VectorXi & assignment, double value, bool isProfit = false) {
     std::cout << "Assignment: ";
     for (int i = 0; i < assignment.size(); ++i) {
       std::cout << "(" << i << "->" << assignment(i) << ") ";
     }
-    std::cout << " Cost: " << cost << std::endl;
+    if (isProfit) {
+      std::cout << " Total Profit: " << value << std::endl;
+    } else {
+      std::cout << " Total Cost: " << value << std::endl;
+    }
   }
 };
 
@@ -298,7 +302,7 @@ TEST_F(HungarianTest, ProfitMaximizationMatrix6x6)
 
   // Print results for verification
   std::cout << "Profit Maximization Test Results:" << std::endl;
-  printAssignment(assignment, totalProfit);
+  printAssignment(assignment, totalProfit, true);
 
   // Also verify the specific assignment matches our expectation
   EXPECT_EQ(assignment(0), 0) << "Row 0 should be assigned to column 0";
