@@ -2,6 +2,7 @@
 // hungarian.hpp: Clean Hungarian Algorithm implementation using Eigen
 // Based on Munkres algorithm with clear step-by-step structure
 // Each method corresponds directly to classic algorithm steps
+// Supports both cost minimization and profit maximization
 ///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -26,22 +27,32 @@ public:
 
   /**
    * @brief Solve assignment problem using Hungarian/Munkres algorithm
-   * @param costMatrix Cost matrix (rows=workers, cols=tasks)
+   * @param matrix Cost matrix (minimize=true) or profit matrix (minimize=false)
    * @param assignment Output vector where assignment[i] = j means worker i assigned to task j
-   * @return Total cost of optimal assignment
+   * @param minimize If true, minimize costs; if false, maximize profits
+   * @return Total cost (if minimize=true) or total profit (if minimize=false) of optimal assignment
    * @throws std::invalid_argument for invalid input matrices
    */
-  double solve(const MatrixXd & costMatrix, VectorXi & assignment);
+  double solve(const MatrixXd & matrix, VectorXi & assignment, bool minimize = true);
 
 private:
   // Algorithm state and flow control
 
   /**
    * @brief Initialize all algorithm state variables and data structures
-   * @param costMatrix Input cost matrix to initialize working data from
-   * @details Sets up dimensions, copies cost matrix, and initializes all boolean matrices and vectors to zero
+   * @param matrix Input matrix to initialize working data from
+   * @param minimize Whether we're minimizing (true) or maximizing (false)
+   * @details Sets up dimensions, transforms matrix if needed, and initializes all boolean matrices and vectors to zero
    */
-  void initializeAlgorithm(const MatrixXd & costMatrix);
+  void initializeAlgorithm(const MatrixXd & matrix, bool minimize);
+
+  /**
+   * @brief Transform profit matrix to cost matrix for maximization problems
+   * @param profitMatrix Original profit matrix
+   * @return Transformed cost matrix (max_profit - each element)
+   * @details Uses the standard transformation: cost[i][j] = max_profit - profit[i][j]
+   */
+  MatrixXd transformProfitToCost(const MatrixXd & profitMatrix) const;
 
   /**
    * @brief Execute the main Hungarian algorithm loop until optimal solution is found
@@ -113,10 +124,10 @@ private:
   void buildAssignmentVector(VectorXi & assignment) const;
 
   /**
-   * @brief Compute total cost of assignment using original cost matrix
-   * @param originalMatrix Original input cost matrix (before algorithm modifications)
+   * @brief Compute total cost/profit of assignment using original matrix
+   * @param originalMatrix Original input matrix (before algorithm modifications)
    * @param assignment Assignment vector where assignment[i] = j means worker i -> task j
-   * @return Sum of costs for all assignments
+   * @return Sum of costs/profits for all assignments
    * @throws std::invalid_argument if assignment vector size doesn't match matrix rows
    */
   double computeTotalCost(const MatrixXd & originalMatrix, const VectorXi & assignment) const;
@@ -163,7 +174,7 @@ private:
   double findMinimumUncoveredValue() const;
 
   // Algorithm state variables
-  MatrixXd workingMatrix_;      // Working distance matrix (modified during algorithm)
+  MatrixXd workingMatrix_;    // Working distance matrix (modified during algorithm)
   BoolMatrix starMatrix_;     // Starred zeros matrix (current assignment)
   BoolMatrix primeMatrix_;    // Primed zeros matrix (temporary markings)
   BoolVector coveredRows_;    // Row coverage flags

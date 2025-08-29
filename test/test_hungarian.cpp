@@ -10,12 +10,16 @@ protected:
   Hungarian solver;
 
   // Helper function to print assignment for debugging
-  void printAssignment(const Hungarian::VectorXi & assignment, double cost) {
+  void printAssignment(const Hungarian::VectorXi & assignment, double value, bool isProfit = false) {
     std::cout << "Assignment: ";
     for (int i = 0; i < assignment.size(); ++i) {
       std::cout << "(" << i << "->" << assignment(i) << ") ";
     }
-    std::cout << " Cost: " << cost << std::endl;
+    if (isProfit) {
+      std::cout << " Total Profit: " << value << std::endl;
+    } else {
+      std::cout << " Total Cost: " << value << std::endl;
+    }
   }
 };
 
@@ -248,4 +252,72 @@ TEST_F(HungarianTest, PerformanceTest)
 
   EXPECT_EQ(assignment.size(), size);
   std::cout << "Performance test (50x50): " << cost << " in " << duration.count() << "ms" << std::endl;
+}
+
+TEST_F(HungarianTest, ProfitMaximizationMatrix6x6)
+{
+  // Profit matrix - we want to MAXIMIZE total profit
+  Hungarian::MatrixXd profitMatrix(6, 6);
+  profitMatrix << 0.774, 0.000, 0.000, 0.000, 0.000, 0.000,
+                  0.000, 0.918, 0.000, 0.000, 0.001, 0.097,
+                  0.000, 0.000, 0.788, 0.000, 0.000, 0.000,
+                  0.000, 0.000, 0.000, 0.149, 0.576, 0.110,
+                  0.000, 0.000, 0.000, 0.636, 0.000, 0.000,
+                  0.000, 0.012, 0.000, 0.000, 0.494, 0.549;
+
+  Hungarian::VectorXi assignment;
+
+  // Call solve with minimize=false for profit maximization
+  double totalProfit = solver.solve(profitMatrix, assignment, false);
+
+  EXPECT_EQ(assignment.size(), 6);
+
+  // Verify all assignments are valid (within column bounds)
+  for (int i = 0; i < assignment.size(); ++i) {
+    if (assignment(i) >= 0) {
+      EXPECT_LT(assignment(i), 6) << "Assignment " << i << " -> " << assignment(i) << " is out of bounds";
+    }
+  }
+
+  // Verify no two rows are assigned to the same column
+  std::vector<bool> usedColumns(6, false);
+  for (int i = 0; i < assignment.size(); ++i) {
+    if (assignment(i) >= 0) {
+      EXPECT_FALSE(usedColumns[assignment(i)]) << "Column " << assignment(i) << " assigned multiple times";
+      usedColumns[assignment(i)] = true;
+    }
+  }
+
+  // Manually verify the optimal assignment
+  // Looking at the matrix, the optimal assignment should be:
+  // Row 0 -> Column 0 (profit = 0.774)
+  // Row 1 -> Column 1 (profit = 0.918)
+  // Row 2 -> Column 2 (profit = 0.788)
+  // Row 3 -> Column 4 (profit = 0.576)  // Best option for row 3
+  // Row 4 -> Column 3 (profit = 0.636)  // Best remaining option for row 4
+  // Row 5 -> Column 5 (profit = 0.549)  // Best remaining option for row 5
+  // Total expected profit = 0.774 + 0.918 + 0.788 + 0.576 + 0.636 + 0.549 = 4.241
+
+  EXPECT_NEAR(totalProfit, 4.241, 1e-10) << "Expected total profit of 4.241";
+
+  // Print results for verification
+  std::cout << "Profit Maximization Test Results:" << std::endl;
+  printAssignment(assignment, totalProfit, true);
+
+  // Also verify the specific assignment matches our expectation
+  EXPECT_EQ(assignment(0), 0) << "Row 0 should be assigned to column 0";
+  EXPECT_EQ(assignment(1), 1) << "Row 1 should be assigned to column 1";
+  EXPECT_EQ(assignment(2), 2) << "Row 2 should be assigned to column 2";
+  EXPECT_EQ(assignment(3), 4) << "Row 3 should be assigned to column 4";
+  EXPECT_EQ(assignment(4), 3) << "Row 4 should be assigned to column 3";
+  EXPECT_EQ(assignment(5), 5) << "Row 5 should be assigned to column 5";
+
+  std::cout << "Individual profits: ";
+  for (int i = 0; i < assignment.size(); ++i) {
+    if (assignment(i) >= 0) {
+      std::cout << "Row " << i << "->Col " << assignment(i)
+                << " (profit=" << profitMatrix(i, assignment(i)) << ") ";
+    }
+  }
+  std::cout << std::endl;
 }

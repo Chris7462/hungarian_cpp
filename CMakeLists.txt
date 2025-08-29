@@ -27,6 +27,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+
 target_compile_options(${PROJECT_NAME} PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>: -Wall -Wextra -Wpedantic>
 )
@@ -71,6 +72,17 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
+
+# Add uninstall target
+if(NOT TARGET uninstall)
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+  add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 enable_testing()
 find_package(GTest REQUIRED)

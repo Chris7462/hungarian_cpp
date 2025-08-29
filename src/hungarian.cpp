@@ -6,27 +6,28 @@
 
 
 //********************************************************//
-// Main solve function - clean entry point
+// Main solve function - clean entry point with min/max support
 //********************************************************//
-double Hungarian::solve(const MatrixXd & costMatrix, VectorXi & assignment)
+double Hungarian::solve(const MatrixXd & matrix, VectorXi & assignment, bool minimize)
 {
   // Validate input matrix dimensions
-  if (costMatrix.rows() <= 0 || costMatrix.cols() <= 0) {
+  if (matrix.rows() <= 0 || matrix.cols() <= 0) {
     throw std::invalid_argument("Matrix dimensions must be positive.");
   }
 
-  // Check for negative values
-  if ((costMatrix.array() < 0).any()) {
-    throw std::invalid_argument("All matrix elements must be non-negative.");
-  }
-
   // Check for infinite or NaN values
-  if (!costMatrix.allFinite()) {
+  if (!matrix.allFinite()) {
     throw std::invalid_argument("Matrix contains infinite or NaN values.");
   }
 
+  // For minimization, check for negative values (cost matrices should be non-negative)
+  // For maximization, we allow negative profits
+  if (minimize && (matrix.array() < 0).any()) {
+    throw std::invalid_argument("Cost matrix elements must be non-negative for minimization.");
+  }
+
   // Initialize algorithm state
-  initializeAlgorithm(costMatrix);
+  initializeAlgorithm(matrix, minimize);
 
   // Execute main algorithm loop
   executeMainLoop();
@@ -34,24 +35,43 @@ double Hungarian::solve(const MatrixXd & costMatrix, VectorXi & assignment)
   // Extract results
   buildAssignmentVector(assignment);
 
-  return computeTotalCost(costMatrix, assignment);
+  return computeTotalCost(matrix, assignment);
 }
 
 //********************************************************//
 // Initialize all algorithm state and data structures
 //********************************************************//
-void Hungarian::initializeAlgorithm(const MatrixXd & costMatrix)
+void Hungarian::initializeAlgorithm(const MatrixXd & matrix, bool minimize)
 {
-  // Cache dimensions and working matrix
-  nRows_ = costMatrix.rows();
-  nCols_ = costMatrix.cols();
-  workingMatrix_ = costMatrix;
+  // Cache dimensions
+  nRows_ = matrix.rows();
+  nCols_ = matrix.cols();
+
+  // Transform matrix if maximizing profits
+  if (minimize) {
+    workingMatrix_ = matrix;  // Use matrix as-is for minimization
+  } else {
+    workingMatrix_ = transformProfitToCost(matrix);  // Transform for maximization
+  }
 
   // Initialize state matrices
   starMatrix_ = BoolMatrix::Zero(nRows_, nCols_);
   primeMatrix_ = BoolMatrix::Zero(nRows_, nCols_);
   coveredRows_ = BoolVector::Zero(nRows_);
   coveredColumns_ = BoolVector::Zero(nCols_);
+}
+
+//********************************************************//
+// Transform profit matrix to cost matrix for maximization
+//********************************************************//
+Hungarian::MatrixXd Hungarian::transformProfitToCost(const MatrixXd & profitMatrix) const
+{
+  // Find the maximum profit value
+  double maxProfit = profitMatrix.maxCoeff();
+
+  // Transform: cost[i][j] = max_profit - profit[i][j]
+  // This ensures all costs are non-negative and preserves the optimal assignment
+  return MatrixXd::Constant(profitMatrix.rows(), profitMatrix.cols(), maxProfit) - profitMatrix;
 }
 
 //********************************************************//
@@ -275,7 +295,7 @@ void Hungarian::buildAssignmentVector(VectorXi & assignment) const
 }
 
 //********************************************************//
-// Compute total assignment cost using original matrix
+// Compute total assignment cost/profit using original matrix
 //********************************************************//
 double Hungarian::computeTotalCost(const MatrixXd & originalMatrix, const VectorXi & assignment) const
 {
