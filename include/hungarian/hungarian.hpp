@@ -22,6 +22,13 @@ public:
   Hungarian() = default;
   ~Hungarian() = default;
 
+  /**
+   * @brief Solve assignment problem using Hungarian/Munkres algorithm
+   * @param distMatrix Cost matrix (rows=workers, cols=tasks)
+   * @param assignment Output vector where assignment[i] = j means worker i assigned to task j
+   * @return Total cost of optimal assignment
+   * @throws std::invalid_argument for invalid input matrices
+   */
   double solve(const Matrix & distMatrix, Vector & assignment);
 
 private:

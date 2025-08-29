@@ -299,8 +299,13 @@ double Hungarian::computeTotalCost(const Matrix & originalMatrix, const Vector &
 // Utility methods for searching matrix elements
 //********************************************************//
 
-int Hungarian::findStarInRow(int row) const
+int Hungarian::findStarInRow(const int row) const
 {
+  // Validate row index
+  if (row < 0 || row >= nRows_) {
+    return -1;
+  }
+
   for (int col = 0; col < nCols_; ++col) {
     if (starMatrix_(row, col)) {
       return col;
@@ -309,8 +314,13 @@ int Hungarian::findStarInRow(int row) const
   return -1;
 }
 
-int Hungarian::findStarInColumn(int col) const
+int Hungarian::findStarInColumn(const int col) const
 {
+  // Validate column index
+  if (col < 0 || col >= nCols_) {
+    return -1;
+  }
+
   for (int row = 0; row < nRows_; ++row) {
     if (starMatrix_(row, col)) {
       return row;
@@ -319,8 +329,13 @@ int Hungarian::findStarInColumn(int col) const
   return -1;
 }
 
-int Hungarian::findPrimeInRow(int row) const
+int Hungarian::findPrimeInRow(const int row) const
 {
+  // Validate row index
+  if (row < 0 || row >= nRows_) {
+    return -1;
+  }
+
   for (int col = 0; col < nCols_; ++col) {
     if (primeMatrix_(row, col)) {
       return col;
