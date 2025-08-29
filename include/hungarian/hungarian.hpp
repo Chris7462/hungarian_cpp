@@ -47,4 +47,7 @@ private:
   BoolMatrix primeMatrix_;        // Primed zeros matrix
   BoolVector coveredRows_;        // Row coverage flags
   BoolVector coveredColumns_;     // Column coverage flags
+                                  //
+  int nRows_;                     // Matrix row count (cached)
+  int nCols_;                     // Matrix column count (cached)
 };

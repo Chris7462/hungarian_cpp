@@ -15,21 +15,21 @@ double Hungarian::solve(const Matrix & distMatrix, Vector & assignment)
   }
 
   // Get matrix dimensions
-  int nRows = distMatrix.rows();
-  int nCols = distMatrix.cols();
+  nRows_ = distMatrix.rows();
+  nCols_ = distMatrix.cols();
 
   // Initialize working matrices
   distMatrix_ = distMatrix;  // Working copy
-  coveredColumns_ = BoolVector::Zero(nCols);
-  coveredRows_ = BoolVector::Zero(nRows);
-  starMatrix_ = BoolMatrix::Zero(nRows, nCols);
-  primeMatrix_ = BoolMatrix::Zero(nRows, nCols);
+  coveredColumns_ = BoolVector::Zero(nCols_);
+  coveredRows_ = BoolVector::Zero(nRows_);
+  starMatrix_ = BoolMatrix::Zero(nRows_, nCols_);
+  primeMatrix_ = BoolMatrix::Zero(nRows_, nCols_);
 
   // Solve the assignment problem
   executeOptimalAssignment();
 
   // Build final assignment vector
-  Vector finalAssignment = Vector::Constant(nRows, -1);
+  Vector finalAssignment = Vector::Constant(nRows_, -1);
   buildAssignmentVector(finalAssignment);
 
   // Copy result to output parameter
@@ -44,21 +44,17 @@ double Hungarian::solve(const Matrix & distMatrix, Vector & assignment)
 //********************************************************//
 void Hungarian::executeOptimalAssignment()
 {
-  // Get dimensions for this execution
-  int nRows = distMatrix_.rows();
-  int nCols = distMatrix_.cols();
-
   // Preliminary steps - subtract minimum from rows or columns
-  if (nRows <= nCols) {
+  if (nRows_ <= nCols_) {
     // Subtract minimum from each row
-    for (int row = 0; row < nRows; ++row) {
+    for (int row = 0; row < nRows_; ++row) {
       double minValue = distMatrix_.row(row).minCoeff();
       distMatrix_.row(row).array() -= minValue;
     }
 
     // Find zeros and star them
-    for (int row = 0; row < nRows; ++row) {
-      for (int col = 0; col < nCols; ++col) {
+    for (int row = 0; row < nRows_; ++row) {
+      for (int col = 0; col < nCols_; ++col) {
         if (std::abs(distMatrix_(row, col)) < std::numeric_limits<double>::epsilon()) {
           if (!coveredColumns_(col)) {
             starMatrix_(row, col) = true;
@@ -70,14 +66,14 @@ void Hungarian::executeOptimalAssignment()
     }
   } else {
     // Subtract minimum from each column
-    for (int col = 0; col < nCols; ++col) {
+    for (int col = 0; col < nCols_; ++col) {
       double minValue = distMatrix_.col(col).minCoeff();
       distMatrix_.col(col).array() -= minValue;
     }
 
     // Find zeros and star them
-    for (int col = 0; col < nCols; ++col) {
-      for (int row = 0; row < nRows; ++row) {
+    for (int col = 0; col < nCols_; ++col) {
+      for (int row = 0; row < nRows_; ++row) {
         if (std::abs(distMatrix_(row, col)) < std::numeric_limits<double>::epsilon()) {
           if (!coveredRows_(row)) {
             starMatrix_(row, col) = true;
@@ -100,11 +96,8 @@ void Hungarian::executeOptimalAssignment()
 //********************************************************//
 void Hungarian::buildAssignmentVector(Vector & assignment)
 {
-  int nRows = starMatrix_.rows();
-  int nCols = starMatrix_.cols();
-
-  for (int row = 0; row < nRows; ++row) {
-    for (int col = 0; col < nCols; ++col) {
+  for (int row = 0; row < nRows_; ++row) {
+    for (int col = 0; col < nCols_; ++col) {
       if (starMatrix_(row, col)) {
         assignment(row) = col;
         break;
@@ -133,10 +126,8 @@ double Hungarian::computeAssignmentCost(const Matrix & originalMatrix, const Vec
 //********************************************************//
 void Hungarian::coverColumnsWithStars()
 {
-  int nCols = starMatrix_.cols();
-
   // Cover every column containing a starred zero
-  for (int col = 0; col < nCols; ++col) {
+  for (int col = 0; col < nCols_; ++col) {
     if (starMatrix_.col(col).any()) {
       coveredColumns_(col) = true;
     }
@@ -152,7 +143,7 @@ void Hungarian::checkOptimalityAndProceed()
 {
   // Count covered columns and get minimum dimension
   int nCoveredColumns = coveredColumns_.cast<int>().sum();
-  int minDim = std::min(distMatrix_.rows(), distMatrix_.cols());
+  int minDim = std::min(nRows_, nCols_);
 
   if (nCoveredColumns == minDim) {
     // Algorithm finished - assignment is built in solve()
@@ -168,22 +159,20 @@ void Hungarian::checkOptimalityAndProceed()
 void Hungarian::findAndProcessUncoveredZeros()
 {
   bool zerosFound = true;
-  int nRows = distMatrix_.rows();
-  int nCols = distMatrix_.cols();
 
   while (zerosFound) {
     zerosFound = false;
 
-    for (int col = 0; col < nCols && !zerosFound; ++col) {
+    for (int col = 0; col < nCols_ && !zerosFound; ++col) {
       if (!coveredColumns_(col)) {
-        for (int row = 0; row < nRows; ++row) {
+        for (int row = 0; row < nRows_; ++row) {
           if (!coveredRows_(row) && std::abs(distMatrix_(row, col)) < std::numeric_limits<double>::epsilon()) {
             // Prime zero
             primeMatrix_(row, col) = true;
 
             // Find starred zero in current row
             int starCol = -1;
-            for (int c = 0; c < nCols; c++) {
+            for (int c = 0; c < nCols_; c++) {
               if (starMatrix_(row, c)) {
                 starCol = c;
                 break;
@@ -214,7 +203,7 @@ void Hungarian::findAndProcessUncoveredZeros()
 //********************************************************//
 void Hungarian::augmentAlternatingPath(int row, int col)
 {
-  // Generate temporary copy of starMatrix (local variable now)
+  // Generate temporary copy of starMatrix
   BoolMatrix newStarMatrix = starMatrix_;
 
   // Star current zero
@@ -257,14 +246,11 @@ void Hungarian::augmentAlternatingPath(int row, int col)
 //********************************************************//
 void Hungarian::updateMatrixValues()
 {
-  int nRows = distMatrix_.rows();
-  int nCols = distMatrix_.cols();
-
   // Find smallest uncovered element h
   double h = std::numeric_limits<double>::max();
-  for (int row = 0; row < nRows; ++row) {
+  for (int row = 0; row < nRows_; ++row) {
     if (!coveredRows_(row)) {
-      for (int col = 0; col < nCols; ++col) {
+      for (int col = 0; col < nCols_; ++col) {
         if (!coveredColumns_(col)) {
           if (distMatrix_(row, col) < h) {
             h = distMatrix_(row, col);
@@ -275,14 +261,14 @@ void Hungarian::updateMatrixValues()
   }
 
   // Add h to each covered row
-  for (int row = 0; row < nRows; ++row) {
+  for (int row = 0; row < nRows_; ++row) {
     if (coveredRows_(row)) {
       distMatrix_.row(row).array() += h;
     }
   }
 
   // Subtract h from each uncovered column
-  for (int col = 0; col < nCols; ++col) {
+  for (int col = 0; col < nCols_; ++col) {
     if (!coveredColumns_(col)) {
       distMatrix_.col(col).array() -= h;
     }
@@ -292,16 +278,11 @@ void Hungarian::updateMatrixValues()
 }
 
 //********************************************************//
-// Search helper functions
-//********************************************************//
-
-//********************************************************//
 // Find starred zero in given row, return column index or -1 if not found
 //********************************************************//
 int Hungarian::findStarInRow(int row) const
 {
-  int nCols = starMatrix_.cols();
-  for (int col = 0; col < nCols; ++col) {
+  for (int col = 0; col < nCols_; ++col) {
     if (starMatrix_(row, col)) {
       return col;
     }
@@ -314,8 +295,7 @@ int Hungarian::findStarInRow(int row) const
 //********************************************************//
 int Hungarian::findStarInColumn(int col) const
 {
-  int nRows = starMatrix_.rows();
-  for (int row = 0; row < nRows; ++row) {
+  for (int row = 0; row < nRows_; ++row) {
     if (starMatrix_(row, col)) {
       return row;
     }
@@ -328,8 +308,7 @@ int Hungarian::findStarInColumn(int col) const
 //********************************************************//
 int Hungarian::findPrimeInRow(int row) const
 {
-  int nCols = primeMatrix_.cols();
-  for (int col = 0; col < nCols; ++col) {
+  for (int col = 0; col < nCols_; ++col) {
     if (primeMatrix_(row, col)) {
       return col;
     }
