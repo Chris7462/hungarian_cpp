@@ -206,12 +206,11 @@ void Hungarian::findAndProcessUncoveredZeros()
     }
   }
 
-  // Move to step 5
   updateMatrixValues();
 }
 
 //********************************************************//
-// Augment assignment along alternating path (original step4)
+// Augment assignment along alternating path
 //********************************************************//
 void Hungarian::augmentAlternatingPath(int row, int col)
 {
@@ -250,12 +249,11 @@ void Hungarian::augmentAlternatingPath(int row, int col)
   starMatrix_ = newStarMatrix;
   coveredRows_.setZero();
 
-  // Move to step 2a
   coverColumnsWithStars();
 }
 
 //********************************************************//
-// Update matrix values by adding/subtracting minimum uncovered value (original step5)
+// Update matrix values by adding/subtracting minimum uncovered value
 //********************************************************//
 void Hungarian::updateMatrixValues()
 {
@@ -290,7 +288,6 @@ void Hungarian::updateMatrixValues()
     }
   }
 
-  // Move to step 3
   findAndProcessUncoveredZeros();
 }
 
