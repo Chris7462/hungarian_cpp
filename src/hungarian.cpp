@@ -1,6 +1,6 @@
 #include <cmath>
-#include <limits>
 #include <stdexcept>
+#include <vector>
 
 #include "hungarian/hungarian.hpp"
 
@@ -8,7 +8,7 @@
 //********************************************************//
 // Main solve function - clean entry point
 //********************************************************//
-double Hungarian::solve(const Matrix & costMatrix, Vector & assignment)
+double Hungarian::solve(const MatrixXd & costMatrix, VectorXi & assignment)
 {
   // Validate input matrix dimensions
   if (costMatrix.rows() <= 0 || costMatrix.cols() <= 0) {
@@ -32,7 +32,6 @@ double Hungarian::solve(const Matrix & costMatrix, Vector & assignment)
   executeMainLoop();
 
   // Extract results
-  assignment = Vector::Constant(nRows_, -1);
   buildAssignmentVector(assignment);
 
   return computeTotalCost(costMatrix, assignment);
@@ -41,7 +40,7 @@ double Hungarian::solve(const Matrix & costMatrix, Vector & assignment)
 //********************************************************//
 // Initialize all algorithm state and data structures
 //********************************************************//
-void Hungarian::initializeAlgorithm(const Matrix & costMatrix)
+void Hungarian::initializeAlgorithm(const MatrixXd & costMatrix)
 {
   // Cache dimensions and working matrix
   nRows_ = costMatrix.rows();
@@ -257,11 +256,11 @@ void Hungarian::step6_UpdateMatrix()
 //********************************************************//
 // Build final assignment vector from starred zeros
 //********************************************************//
-void Hungarian::buildAssignmentVector(Vector & assignment) const
+void Hungarian::buildAssignmentVector(VectorXi & assignment) const
 {
   // Ensure assignment vector is properly sized
   if (assignment.size() != nRows_) {
-    assignment = Vector::Constant(nRows_, -1);
+    assignment = VectorXi::Constant(nRows_, -1);
   }
 
   for (int row = 0; row < nRows_; ++row) {
@@ -278,7 +277,7 @@ void Hungarian::buildAssignmentVector(Vector & assignment) const
 //********************************************************//
 // Compute total assignment cost using original matrix
 //********************************************************//
-double Hungarian::computeTotalCost(const Matrix & originalMatrix, const Vector & assignment) const
+double Hungarian::computeTotalCost(const MatrixXd & originalMatrix, const VectorXi & assignment) const
 {
   // Validate assignment vector size
   if (assignment.size() != originalMatrix.rows()) {
