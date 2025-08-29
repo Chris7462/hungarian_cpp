@@ -10,7 +10,7 @@ protected:
   Hungarian solver;
 
   // Helper function to print assignment for debugging
-  void printAssignment(const Hungarian::Vector& assignment, double cost) {
+  void printAssignment(const Hungarian::VectorXi & assignment, double cost) {
     std::cout << "Assignment: ";
     for (int i = 0; i < assignment.size(); ++i) {
       std::cout << "(" << i << "->" << assignment(i) << ") ";
@@ -21,16 +21,16 @@ protected:
 
 TEST_F(HungarianTest, BasicSquareMatrix3x3_Test1)
 {
-  Hungarian::Matrix matrix(3, 3);
-  matrix << 25, 40, 35,
-            40, 60, 35,
-            20, 40, 25;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(3, 3);
+  matrix << 25.0, 40.0, 35.0,
+            40.0, 60.0, 35.0,
+            20.0, 40.0, 25.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
   // Verify assignment is valid
-  EXPECT_EQ(assignment.size(), 3);
+  EXPECT_EQ(assignment.size(), 3.0);
   EXPECT_GE(assignment(0), -1);
   EXPECT_GE(assignment(1), -1);
   EXPECT_GE(assignment(2), -1);
@@ -43,11 +43,11 @@ TEST_F(HungarianTest, BasicSquareMatrix3x3_Test1)
 
 TEST_F(HungarianTest, BasicSquareMatrix3x3_Test2)
 {
-  Hungarian::Matrix matrix(3, 3);
-  matrix << 64, 18, 75,
-            97, 60, 24,
-            87, 63, 15;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(3, 3);
+  matrix << 64.0, 18.0, 75.0,
+            97.0, 60.0, 24.0,
+            87.0, 63.0, 15.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -61,12 +61,12 @@ TEST_F(HungarianTest, BasicSquareMatrix3x3_Test2)
 
 TEST_F(HungarianTest, BasicSquareMatrix4x4_Test1)
 {
-  Hungarian::Matrix matrix(4, 4);
+  Hungarian::MatrixXd matrix(4, 4);
   matrix << 80, 40, 50, 46,
             40, 70, 20, 25,
             30, 10, 20, 30,
             35, 20, 25, 30;
-  Hungarian::Vector assignment;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -80,13 +80,13 @@ TEST_F(HungarianTest, BasicSquareMatrix4x4_Test1)
 
 TEST_F(HungarianTest, RectangularMatrix5x4)
 {
-  Hungarian::Matrix matrix(5, 4);
-  matrix << 10, 19, 8, 15,
-            10, 18, 7, 17,
-            13, 16, 9, 14,
-            12, 19, 8, 18,
-            14, 17, 10, 19;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(5, 4);
+  matrix << 10.0, 19.0,  8.0, 15.0,
+            10.0, 18.0,  7.0, 17.0,
+            13.0, 16.0,  9.0, 14.0,
+            12.0, 19.0,  8.0, 18.0,
+            14.0, 17.0, 10.0, 19.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -100,28 +100,29 @@ TEST_F(HungarianTest, RectangularMatrix5x4)
 
 TEST_F(HungarianTest, LargeMatrix20x8)
 {
-  Hungarian::Matrix matrix(20, 8);
-  matrix << 85, 12, 36, 83, 50, 96, 12, 1,
-         84, 35, 16, 17, 40, 94, 16, 52,
-         14, 16, 8, 53, 14, 12, 70, 50,
-         73, 83, 19, 44, 83, 66, 71, 18,
-         36, 45, 29, 4, 61, 15, 70, 47,
-         7, 14, 11, 69, 57, 32, 37, 81,
-         9, 65, 38, 74, 87, 51, 86, 52,
-         52, 40, 56, 10, 42, 2, 26, 36,
-         85, 86, 36, 90, 49, 89, 41, 74,
-         40, 67, 2, 70, 18, 5, 94, 43,
-         85, 12, 36, 83, 50, 96, 12, 1,
-         84, 35, 16, 17, 40, 94, 16, 52,
-         14, 16, 8, 53, 14, 12, 70, 50,
-         73, 83, 19, 44, 83, 66, 71, 18,
-         36, 45, 29, 4, 61, 15, 70, 47,
-         7, 14, 11, 69, 57, 32, 37, 81,
-         9, 65, 38, 74, 87, 51, 86, 52,
-         52, 40, 56, 10, 42, 2, 26, 36,
-         85, 86, 36, 90, 49, 89, 41, 74,
-         40, 67, 2, 70, 18, 5, 94, 43;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(20, 8);
+  matrix << 85.0, 12.0, 36.0, 83.0, 50.0, 96.0, 12.0,  1.0,
+            84.0, 35.0, 16.0, 17.0, 40.0, 94.0, 16.0, 52.0,
+            14.0, 16.0,  8.0, 53.0, 14.0, 12.0, 70.0, 50.0,
+            73.0, 83.0, 19.0, 44.0, 83.0, 66.0, 71.0, 18.0,
+            36.0, 45.0, 29.0,  4.0, 61.0, 15.0, 70.0, 47.0,
+             7.0, 14.0, 11.0, 69.0, 57.0, 32.0, 37.0, 81.0,
+             9.0, 65.0, 38.0, 74.0, 87.0, 51.0, 86.0, 52.0,
+            52.0, 40.0, 56.0, 10.0, 42.0,  2.0, 26.0, 36.0,
+            85.0, 86.0, 36.0, 90.0, 49.0, 89.0, 41.0, 74.0,
+            40.0, 67.0,  2.0, 70.0, 18.0,  5.0, 94.0, 43.0,
+            85.0, 12.0, 36.0, 83.0, 50.0, 96.0, 12.0,  1.0,
+            84.0, 35.0, 16.0, 17.0, 40.0, 94.0, 16.0, 52.0,
+            14.0, 16.0,  8.0, 53.0, 14.0, 12.0, 70.0, 50.0,
+            73.0, 83.0, 19.0, 44.0, 83.0, 66.0, 71.0, 18.0,
+            36.0, 45.0, 29.0,  4.0, 61.0, 15.0, 70.0, 47.0,
+             7.0, 14.0, 11.0, 69.0, 57.0, 32.0, 37.0, 81.0,
+             9.0, 65.0, 38.0, 74.0, 87.0, 51.0, 86.0, 52.0,
+            52.0, 40.0, 56.0, 10.0, 42.0,  2.0, 26.0, 36.0,
+            85.0, 86.0, 36.0, 90.0, 49.0, 89.0, 41.0, 74.0,
+            40.0, 67.0,  2.0, 70.0, 18.0,  5.0, 94.0, 43.0;
+
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -147,9 +148,9 @@ TEST_F(HungarianTest, LargeMatrix20x8)
 
 TEST_F(HungarianTest, SingleElementMatrix)
 {
-  Hungarian::Matrix matrix(1, 1);
-  matrix << 42;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(1, 1);
+  matrix << 42.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -160,11 +161,11 @@ TEST_F(HungarianTest, SingleElementMatrix)
 
 TEST_F(HungarianTest, ZeroMatrix)
 {
-  Hungarian::Matrix matrix(3, 3);
-  matrix << 0, 0, 0,
-         0, 0, 0,
-         0, 0, 0;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(3, 3);
+  matrix << 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -176,11 +177,11 @@ TEST_F(HungarianTest, ZeroMatrix)
 
 TEST_F(HungarianTest, IdentityMatrix)
 {
-  Hungarian::Matrix matrix(3, 3);
-  matrix << 1, 2, 3,
-         2, 1, 3,
-         3, 2, 1;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(3, 3);
+  matrix << 1.0, 2.0, 3.0,
+            2.0, 1.0, 3.0,
+            3.0, 2.0, 1.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -192,11 +193,11 @@ TEST_F(HungarianTest, IdentityMatrix)
 
 TEST_F(HungarianTest, NegativeValuesThrowException)
 {
-  Hungarian::Matrix matrix(3, 3);
-  matrix << 1, -2, 3,
-         2, 1, 3,
-         3, 2, 1;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(3, 3);
+  matrix << 1.0, -2.0, 3.0,
+            2.0,  1.0, 3.0,
+            3.0,  2.0, 1.0;
+  Hungarian::VectorXi assignment;
 
   EXPECT_THROW(solver.solve(matrix, assignment), std::invalid_argument);
 }
@@ -204,12 +205,12 @@ TEST_F(HungarianTest, NegativeValuesThrowException)
 TEST_F(HungarianTest, RectangularMatrix4x5)
 {
   // More columns than rows
-  Hungarian::Matrix matrix(4, 5);
-  matrix << 10, 19, 8, 15, 12,
-         10, 18, 7, 17, 11,
-         13, 16, 9, 14, 13,
-         12, 19, 8, 18, 10;
-  Hungarian::Vector assignment;
+  Hungarian::MatrixXd matrix(4, 5);
+  matrix << 10.0, 19.0, 8.0, 15.0, 12.0,
+            10.0, 18.0, 7.0, 17.0, 11.0,
+            13.0, 16.0, 9.0, 14.0, 13.0,
+            12.0, 19.0, 8.0, 18.0, 10.0;
+  Hungarian::VectorXi assignment;
 
   double cost = solver.solve(matrix, assignment);
 
@@ -229,7 +230,7 @@ TEST_F(HungarianTest, RectangularMatrix4x5)
 TEST_F(HungarianTest, PerformanceTest)
 {
   const int size = 50;
-  Hungarian::Matrix matrix(size, size);
+  Hungarian::MatrixXd matrix(size, size);
 
   // Fill with random-like values
   for (int i = 0; i < size; ++i) {
@@ -237,7 +238,7 @@ TEST_F(HungarianTest, PerformanceTest)
       matrix(i, j) = (i * 13 + j * 7) % 100 + 1;  // Deterministic "random" values
     }
   }
-  Hungarian::Vector assignment;
+  Hungarian::VectorXi assignment;
 
   auto start = std::chrono::high_resolution_clock::now();
   double cost = solver.solve(matrix, assignment);
@@ -248,8 +249,3 @@ TEST_F(HungarianTest, PerformanceTest)
   EXPECT_EQ(assignment.size(), size);
   std::cout << "Performance test (50x50): " << cost << " in " << duration.count() << "ms" << std::endl;
 }
-
-//int main(int argc, char **argv) {
-//  ::testing::InitGoogleTest(&argc, argv);
-//  return RUN_ALL_TESTS();
-//}
