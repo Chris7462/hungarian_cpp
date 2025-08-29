@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// hungarian.hpp: Modern Hungarian Algorithm implementation using Eigen
-// Based on Munkres algorithm for solving assignment problems
-// Modernized version with Eigen library for better performance and readability
+// hungarian.hpp: Clean Hungarian Algorithm implementation using Eigen
+// Based on Munkres algorithm with clear step-by-step structure
+// Each method corresponds directly to classic algorithm steps
 ///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -25,29 +25,39 @@ public:
   double solve(const Matrix & distMatrix, Vector & assignment);
 
 private:
-  // Core algorithm phases (preserving original step structure)
-  void executeOptimalAssignment();
-  void buildAssignmentVector(Vector & assignment);
-  double computeAssignmentCost(const Matrix & originalMatrix, const Vector & assignment);
+  // Algorithm state and flow control
+  void initializeAlgorithm(const Matrix & distMatrix);
+  void executeMainLoop();
+  bool isOptimalSolutionFound() const;
 
-  // Algorithm steps with descriptive names
-  void coverColumnsWithStars();
-  void checkOptimalityAndProceed();
-  void findAndProcessUncoveredZeros();
-  void augmentAlternatingPath(int row, int col);
-  void updateMatrixValues();
+  // Classic Munkres algorithm steps (clear 1-to-1 mapping)
+  void step1_ReduceMatrix();
+  void step2_StarZeros();
+  void step3_CoverStarredColumns();
+  void step4_FindUncoveredZero();
+  void step5_AugmentPath(const int row, const int col);
+  void step6_UpdateMatrix();
 
-  int findStarInRow(int row) const;
-  int findStarInColumn(int col) const;
-  int findPrimeInRow(int row) const;
+  // Result extraction
+  void buildAssignmentVector(Vector & assignment) const;
+  double computeTotalCost(const Matrix & originalMatrix, const Vector & assignment) const;
 
-  // Member variables - core algorithm state only
-  Matrix distMatrix_;             // Working distance matrix
-  BoolMatrix starMatrix_;         // Starred zeros matrix
-  BoolMatrix primeMatrix_;        // Primed zeros matrix
-  BoolVector coveredRows_;        // Row coverage flags
-  BoolVector coveredColumns_;     // Column coverage flags
-                                  //
-  int nRows_;                     // Matrix row count (cached)
-  int nCols_;                     // Matrix column count (cached)
+  // Utility methods for matrix operations
+  int findStarInRow(const int row) const;
+  int findStarInColumn(const int col) const;
+  int findPrimeInRow(const int row) const;
+  std::pair<int, int> findUncoveredZero() const;
+  double findMinimumUncoveredValue() const;
+
+  // Algorithm state variables
+  Matrix workingMatrix_;      // Working distance matrix
+  BoolMatrix starMatrix_;     // Starred zeros matrix
+  BoolMatrix primeMatrix_;    // Primed zeros matrix
+  BoolVector coveredRows_;    // Row coverage flags
+  BoolVector coveredColumns_; // Column coverage flags
+  int nRows_;                 // Matrix row count (cached)
+  int nCols_;                 // Matrix column count (cached)
+
+  // Constants for better maintainability
+  static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 };
