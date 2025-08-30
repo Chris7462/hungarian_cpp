@@ -236,10 +236,10 @@ void Hungarian::step5_AugmentPath(const int startRow, const int startCol)
   }
 
   // Apply all changes to the star matrix
-  for (const auto& pos : pathToUnstar) {
+  for (const auto & pos : pathToUnstar) {
     starMatrix_(pos.first, pos.second) = false;
   }
-  for (const auto& pos : pathToStar) {
+  for (const auto & pos : pathToStar) {
     starMatrix_(pos.first, pos.second) = true;
   }
 
@@ -297,7 +297,9 @@ void Hungarian::buildAssignmentVector(VectorXi & assignment) const
 //********************************************************//
 // Compute total assignment cost/profit using original matrix
 //********************************************************//
-double Hungarian::computeTotalCost(const MatrixXd & originalMatrix, const VectorXi & assignment) const
+double Hungarian::computeTotalCost(
+  const MatrixXd & originalMatrix,
+  const VectorXi & assignment) const
 {
   // Validate assignment vector size
   if (assignment.size() != originalMatrix.rows()) {
