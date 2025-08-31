@@ -1,17 +1,17 @@
 # hungarian\_cpp
 Modern C++ implementation of Hungarian Algorithm using Eigen.
 
-## Usage Examples
+## Usage examples
 ### For ROS2 projects (default):
 ```bash
 cd ${ros2_workspace}/src
-git clone git@github.com:Chris7462/hungarian_cpp.git
+git clone https://github.com/Chris7462/hungarian_cpp.git
 cd ${ros2_workspace}
 colcon build --symlink-install --packages-select hungarian
 ```
 ### For non-ROS2 projects:
 ```bash
-git clone git@github.com:Chris7462/hungarian_cpp.git
+git clone https://github.com/Chris7462/hungarian_cpp.git
 cd hungarian_cpp
 mkdir build && cd build
 cmake -DENABLE_ROS2=OFF ..

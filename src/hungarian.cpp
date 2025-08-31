@@ -5,6 +5,9 @@
 #include "hungarian/hungarian.hpp"
 
 
+namespace hungarian
+{
+
 //********************************************************//
 // Main solve function - clean entry point with min/max support
 //********************************************************//
@@ -402,3 +405,5 @@ double Hungarian::findMinimumUncoveredValue() const
 
   return minValue;
 }
+
+}  // namespace hungarian

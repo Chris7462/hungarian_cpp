@@ -13,6 +13,9 @@
 #include <Eigen/Dense>
 
 
+namespace hungarian
+{
+
 class Hungarian
 {
 public:
@@ -185,3 +188,5 @@ private:
   // Constants for better maintainability
   static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 };
+
+} // namespace hungarian

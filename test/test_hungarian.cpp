@@ -1,8 +1,12 @@
-#include <gtest/gtest.h>
 #include <vector>
 #include <iostream>
+
+#include <gtest/gtest.h>
+
 #include "hungarian/hungarian.hpp"
 
+
+using namespace hungarian;
 
 class HungarianTest : public ::testing::Test
 {
