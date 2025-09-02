@@ -50,7 +50,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
     Eigen3::Eigen)
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 
@@ -76,7 +76,7 @@ if(ENABLE_ROS2)
     DESTINATION include)
 
   # Export targets for ROS 2
-  ament_export_targets(${EXPORT_NAME} HAS_LIBRARY_TARGET)
+  ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
   ament_export_dependencies(Eigen3)
 
   # ROS 2 Testing
