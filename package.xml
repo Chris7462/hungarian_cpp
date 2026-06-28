@@ -5,11 +5,11 @@
   <version>1.0.0</version>
   <description>Modern C++ implementation of Hungarian Algorithm using Eigen</description>
   <maintainer email="chris7462@gmail.com">chris7462</maintainer>
-  <license>MIT</license>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_export_depend>libeigen3-dev</build_export_depend>
+  <depend>eigen</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
