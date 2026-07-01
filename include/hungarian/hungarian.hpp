@@ -16,6 +16,10 @@
 namespace hungarian
 {
 
+/**
+ * @brief Hungarian/Munkres algorithm solver for the linear assignment problem.
+ * @note Instances are stateful and not thread-safe — see solve() for details.
+ */
 class Hungarian
 {
 public:
@@ -35,6 +39,12 @@ public:
    * @param minimize If true, minimize costs; if false, maximize profits
    * @return Total cost (if minimize=true) or total profit (if minimize=false) of optimal assignment
    * @throws std::invalid_argument for invalid input matrices
+   * @note Not thread-safe: a single Hungarian instance stores all algorithm state
+   *   (working matrix, star/prime matrices, coverage flags) as mutable members that
+   *   are reset on each solve() call. Concurrent solve() calls on the same instance
+   *   from different threads (e.g. separate ROS2 callback threads) will race on this
+   *   shared state. Use a separate Hungarian instance per thread, or serialize access
+   *   with a mutex, if solve() may be called concurrently.
    */
   double solve(const MatrixXd & matrix, VectorXi & assignment, bool minimize = true);
 
@@ -186,7 +196,7 @@ private:
   int nCols_;                 // Matrix column count (cached for performance)
 
   // Constants for better maintainability
-  static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+  static constexpr double EPSILON = std::numeric_limits<float>::epsilon();
 };
 
 } // namespace hungarian

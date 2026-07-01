@@ -5,10 +5,6 @@ project(hungarian
   DESCRIPTION "Modern C++ implementation of Hungarian Algorithm using Eigen"
   LANGUAGES CXX)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 # Option to enable/disable ROS 2 support
 option(ENABLE_ROS2 "Build with ROS 2 support" ON)
 
@@ -45,20 +41,25 @@ add_library(${PROJECT_NAME}
 
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(${PROJECT_NAME}
-  PUBLIC
-    Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  Eigen3::Eigen)
 
-target_compile_features(${PROJECT_NAME} PUBLIC c_std_99 cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR})
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:
+    -Wall
+    -Wextra
+    -Wpedantic
+  >)
 
 # =============================================================================
 # ROS 2 SPECIFIC CONFIGURATION
@@ -74,7 +75,7 @@ if(ENABLE_ROS2)
     RUNTIME DESTINATION bin)
 
   # Install headers
-  install(DIRECTORY include/${PROJECT_NAME}
+  install(DIRECTORY include/
     DESTINATION include)
 
   # Export targets for ROS 2
@@ -109,11 +110,10 @@ else()
     EXPORT ${PROJECT_NAME}Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    RUNTIME DESTINATION bin)
 
   # Install headers
-  install(DIRECTORY include/${PROJECT_NAME}
+  install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
   # Export targets for pure CMake

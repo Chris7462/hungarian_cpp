@@ -1,5 +1,6 @@
-#include <vector>
+#include <chrono>
 #include <iostream>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -39,7 +40,7 @@ TEST_F(HungarianTest, BasicSquareMatrix3x3_Test1)
   double cost = solver.solve(matrix, assignment);
 
   // Verify assignment is valid
-  EXPECT_EQ(assignment.size(), 3.0);
+  EXPECT_EQ(assignment.size(), 3);
   EXPECT_GE(assignment(0), -1);
   EXPECT_GE(assignment(1), -1);
   EXPECT_GE(assignment(2), -1);
